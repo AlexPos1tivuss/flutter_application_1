@@ -1,3 +1,4 @@
+// screens/flappy_bird.dart
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -7,19 +8,18 @@ class FlappyBirdScreen extends StatefulWidget {
   _FlappyBirdScreenState createState() => _FlappyBirdScreenState();
 }
 
-class _FlappyBirdScreenState extends State<FlappyBirdScreen>
-    with SingleTickerProviderStateMixin {
+class _FlappyBirdScreenState extends State<FlappyBirdScreen> {
   double birdY = 0;
   double birdVelocity = 0;
-  double gravity = 0.0005;
-  double jumpStrength = -0.015;
+  double gravity = 0.0012;
+  double jumpStrength = -0.02;
   bool isGameRunning = false;
   int score = 0;
 
   List<double> pipeXPositions = [2, 3.5];
   double pipeWidth = 60;
-  double gapHeight = 200;
-
+  double gapHeight = 150;
+  List<double> pipeGapPositions = [];
   Timer? gameTimer;
 
   void _startGame() {
@@ -28,7 +28,12 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
       birdY = 0;
       birdVelocity = 0;
       score = 0;
+
       pipeXPositions = [2, 3.5];
+      pipeGapPositions = [
+        if (pipeGapPositions.length < pipeXPositions.length)
+          ...List.generate(pipeXPositions.length, (_) => _generatePipeGap()),
+      ];
     });
 
     gameTimer = Timer.periodic(Duration(milliseconds: 16), (timer) {
@@ -40,6 +45,10 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
           pipeXPositions[i] -= 0.01;
           if (pipeXPositions[i] < -1.5) {
             pipeXPositions[i] += 2.5;
+            pipeGapPositions[i] = _generatePipeGap();
+          }
+
+          if (pipeXPositions[i] < 0 && pipeXPositions[i] > -0.01) {
             score++;
           }
         }
@@ -51,11 +60,35 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
     });
   }
 
+  double _generatePipeGap() {
+    return -0.4 + Random().nextDouble() * 0.8;
+  }
+
   void _gameOver() {
     gameTimer?.cancel();
     setState(() {
       isGameRunning = false;
     });
+    _showGameOverDialog();
+  }
+
+  void _showGameOverDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Проиграл"),
+        content: Text("Очки: $score"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _startGame();
+            },
+            child: Text("Играть снова"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _jump() {
@@ -69,12 +102,14 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
   }
 
   bool _isBirdColliding() {
-    for (var pipeX in pipeXPositions) {
-      double pipeTopY = -1 + Random().nextDouble() * 0.5;
-      double pipeBottomY =
-          pipeTopY + gapHeight / MediaQuery.of(context).size.height * 2;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double pipeGapHeight = gapHeight / screenHeight * 2;
 
-      if (pipeX < 0.1 && pipeX > -0.1) {
+    for (int i = 0; i < pipeXPositions.length; i++) {
+      double pipeTopY = pipeGapPositions[i];
+      double pipeBottomY = pipeTopY + pipeGapHeight;
+
+      if (pipeXPositions[i] < 0.1 && pipeXPositions[i] > -0.1) {
         if (birdY < pipeTopY || birdY > pipeBottomY) {
           return true;
         }
@@ -85,13 +120,15 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return GestureDetector(
       onTap: _jump,
       child: Scaffold(
         body: Stack(
           children: [
             Positioned(
-              top: MediaQuery.of(context).size.height * (0.5 + birdY),
+              top: screenHeight * (0.5 + birdY),
               left: MediaQuery.of(context).size.width * 0.4,
               child: Container(
                 width: 40,
@@ -102,21 +139,23 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
                 ),
               ),
             ),
-            for (var pipeX in pipeXPositions)
+            for (int i = 0; i < pipeXPositions.length; i++)
               Positioned(
-                left: MediaQuery.of(context).size.width * pipeX,
-                top: 0,
+                left: MediaQuery.of(context).size.width * pipeXPositions[i],
                 child: Column(
                   children: [
                     Container(
                       width: pipeWidth,
-                      height: MediaQuery.of(context).size.height * 0.3,
+                      height: screenHeight *
+                          (0.5 +
+                              pipeGapPositions[i] -
+                              gapHeight / screenHeight),
                       color: Colors.green,
                     ),
                     SizedBox(height: gapHeight),
                     Container(
                       width: pipeWidth,
-                      height: MediaQuery.of(context).size.height,
+                      height: screenHeight,
                       color: Colors.green,
                     ),
                   ],
@@ -126,7 +165,7 @@ class _FlappyBirdScreenState extends State<FlappyBirdScreen>
               top: 30,
               left: 10,
               child: Text(
-                'Очки: $score',
+                'Score: $score',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
