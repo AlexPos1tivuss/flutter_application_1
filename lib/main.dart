@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens\notes.dart';
+import 'screens/notes.dart';
+import 'screens/flappy_bird.dart';
+import 'screens/space_shooter.dart';
 
 void main() {
   runApp(GameNotesApp());
@@ -9,7 +11,7 @@ class GameNotesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Game Notes App',
+      title: 'App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -28,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    /*FlappyBirdScreen(),
-    SpaceShooterScreen(),*/
+    FlappyBirdScreen(),
+    SpaceShooterScreen(),
     NotesScreen(),
   ];
 
