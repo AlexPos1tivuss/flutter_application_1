@@ -49,19 +49,19 @@ class _NotesScreenState extends State<NotesScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(labelText: 'Заголовок'),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(labelText: 'Описание'),
             ),
           ),
           ElevatedButton(
             onPressed: _addNote,
-            child: Text('Add Note'),
+            child: Text('Добавить'),
           ),
           Expanded(
             child: ListView.builder(
