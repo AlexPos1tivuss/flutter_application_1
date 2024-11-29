@@ -27,12 +27,16 @@ class _SpaceShooterScreenState extends State<SpaceShooterScreen> {
     });
 
     gameTimer = Timer.periodic(Duration(milliseconds: 16), (timer) {
+      if (!isGameRunning) {
+        timer.cancel();
+        return;
+      }
+
       setState(() {
         bullets = bullets.map((bullet) {
           return {'x': bullet['x']!, 'y': bullet['y']! + 0.02};
         }).toList();
         bullets.removeWhere((bullet) => bullet['y']! > 1);
-
         for (var enemy in enemies) {
           enemy['y'] = enemy['y']! + enemy['speed']!;
           if (enemy['y']! > 1) {
@@ -40,7 +44,6 @@ class _SpaceShooterScreenState extends State<SpaceShooterScreen> {
           }
         }
         enemies.removeWhere((enemy) => enemy['y']! > 1);
-
         for (int i = bullets.length - 1; i >= 0; i--) {
           for (int j = enemies.length - 1; j >= 0; j--) {
             if ((bullets[i]['x']! - enemies[j]['x']!).abs() < 0.05 &&
@@ -48,35 +51,43 @@ class _SpaceShooterScreenState extends State<SpaceShooterScreen> {
               enemies.removeAt(j);
               bullets.removeAt(i);
               score++;
+              enemies.add({
+                'x': Random().nextDouble() * 1.5 - 1,
+                'y': -1.0,
+                'speed': Random().nextDouble() * 0.01 + 0.005
+              });
               break;
             }
           }
         }
-
         if ((spaceshipX - targetX).abs() > 0.01) {
           spaceshipX += (targetX - spaceshipX) * 0.1;
         }
       });
     });
-
     Timer.periodic(Duration(seconds: 1), (timer) {
-      if (isGameRunning) {
-        setState(() {
-          bullets.add({'x': spaceshipX, 'y': 0});
-        });
+      if (!isGameRunning) {
+        timer.cancel();
+        return;
       }
-    });
 
+      setState(() {
+        bullets.add({'x': spaceshipX, 'y': 0});
+      });
+    });
     Timer.periodic(Duration(seconds: 2), (timer) {
-      if (isGameRunning) {
-        setState(() {
-          enemies.add({
-            'x': Random().nextDouble() * 2 - 1,
-            'y': -1.0,
-            'speed': Random().nextDouble() * 0.01 + 0.005
-          });
-        });
+      if (!isGameRunning) {
+        timer.cancel();
+        return;
       }
+
+      setState(() {
+        enemies.add({
+          'x': Random().nextDouble() * 1.5 - 1,
+          'y': -1.0,
+          'speed': Random().nextDouble() * 0.01 + 0.005
+        });
+      });
     });
   }
 

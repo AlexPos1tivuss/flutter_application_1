@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/notes.dart';
 import 'screens/flappy_bird.dart';
 import 'screens/space_shooter.dart';
+import 'screens/info.dart';
 
 void main() {
   runApp(GameNotesApp());
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     FlappyBirdScreen(),
     SpaceShooterScreen(),
     NotesScreen(),
+    InfoScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -48,12 +50,15 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.black,
         items: [
           BottomNavigationBarItem(
               icon: Icon(Icons.flight), label: 'Flappy Bird'),
           BottomNavigationBarItem(
               icon: Icon(Icons.rocket), label: 'Space Shooter'),
           BottomNavigationBarItem(icon: Icon(Icons.note), label: 'Notes'),
+          BottomNavigationBarItem(icon: Icon(Icons.info), label: 'Info'),
         ],
       ),
     );
